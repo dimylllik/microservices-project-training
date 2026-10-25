@@ -33,7 +33,10 @@ def get_order(order_id: UUID, db:Session = Depends(get_db)):
 def order_cancel(order_id: UUID, db:Session = Depends(get_db)):
     repo = OrderRepository(db)
     service = OrderService(repo)
-    order = service.cancel_order(order_id)
+    try:
+        order = service.cancel_order(order_id)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
     if order is None:
         raise HTTPException(status_code=404, detail="Заказ не найден")
 

@@ -22,15 +22,14 @@ class OrderRepository:
 
         if order is None:
             return None
-        
-        order.status = "CANCELLED"
-        self.db.commit()
-        self.db.refresh(order)
+
+        if  order.status == "PENDING":
+            order.status = "CANCELLED"
+            self.db.commit()
+            self.db.refresh(order)
         
         return order
             
-    
-
     def mark_order_paid(): # обработка успешной оплаты (сделать после рэбита)
         pass
 

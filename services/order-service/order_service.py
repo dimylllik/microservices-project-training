@@ -35,4 +35,15 @@ class OrderService:
         return self.repo.get_user_orders(user_id)
 
     def cancel_order(self, order_id:UUID) -> Order | None:
+        order = self.repo.get_order(order_id)
+
+        if order is None:
+            return None
+
+        if order.status == "CANCELLED":
+            return order
+
+        if order.status != "PENDING":
+            raise ValueError("Заказ в данном статусе отменить нельзя")
+        
         return self.repo.cancel_order(order_id)

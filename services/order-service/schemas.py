@@ -1,15 +1,15 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import datetime
 
 class OrderItemCreate(BaseModel):
     product_id: UUID
-    quantity : int 
-    price: int 
+    quantity : int = Field(gt= 0) # строго больше нуля
+    price: int = Field(ge = 0) # больше или равно нулю
 
 class OrderCreate(BaseModel):
     user_id: UUID
-    items: list[OrderItemCreate]
+    items: list[OrderItemCreate] = Field(min_length=1)
 
 class OrderItemRead(BaseModel):
     id : UUID
