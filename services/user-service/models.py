@@ -20,3 +20,4 @@ class User(Base):
     email = Column(String(255), nullable=False, unique= True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     password_hash = Column(String(255), nullable=False)
+

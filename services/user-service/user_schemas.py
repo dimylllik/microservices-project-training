@@ -14,3 +14,15 @@ class UserRead(BaseModel):
     role: str 
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+class UserLogin(BaseModel):
+    email:EmailStr
+    password : str = Field(min_length=8, max_length=120)
+
+class UserUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    email: EmailStr | None = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
