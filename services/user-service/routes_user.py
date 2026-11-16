@@ -3,9 +3,13 @@ from sqlalchemy.orm import Session
 from database import get_db
 from user_repository import UserRepository
 from user_service import UserService
-from user_schemas import UserRead, UserCreate, UserLogin, UserUpdate
+from user_schemas import UserRead, UserCreate, UserLogin, UserUpdate, Token
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 
 router = APIRouter(prefix="/users", tags=["users"])
+bearer = HTTPBearer()
+
 
 @router.post("/", response_model=UserRead, status_code=201)
 def create_user(data:UserCreate, db: Session = Depends(get_db)):
@@ -14,7 +18,7 @@ def create_user(data:UserCreate, db: Session = Depends(get_db)):
     return service.user_create(data)
 
 
-@router.post('/login', response_model=UserRead, status_code=200)
+@router.post('/login', response_model=Token, status_code=200)
 def login(data: UserLogin, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
@@ -35,14 +39,20 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
         )
 
 @router.patch('/{user_id}', response_model=UserRead, status_code=200)
-def update_user(user_id: str, data: UserUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: str, data: UserUpdate, db: Session = Depends(get_db),
+                credentials: HTTPAuthorizationCredentials = Depends(bearer)):
     repo = UserRepository(db)
     service = UserService(repo)
-
-    return service.update_user(user_id, data)
+    token = credentials.credentials
+    current_user = service.get_current_user(token)
+    return service.update_user(user_id, current_user, data)
 
 @router.delete('/{user_id}', response_model=bool, status_code=200)
-def delete_user(user_id:str, db: Session = Depends(get_db)):
+def delete_user(user_id:str, db: Session = Depends(get_db), 
+                credentials: HTTPAuthorizationCredentials = Depends(bearer)):
     repo = UserRepository(db)
     service = UserService(repo)
-    return service.delete_user(user_id)
+    token = credentials.credentials
+    current_user = service.get_current_user(token)
+    return service.delete_user(user_id, current_user)
+
